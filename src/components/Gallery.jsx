@@ -1,7 +1,9 @@
-import { useContext, useEffect, useReducer, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ImageCard from "./ImageCard";
 import UploadForm from "./Uploadform";
 import { Context } from "../Context";
+import Firestore from "../handlers/firestore";
+const {writeDoc, readDocs} = Firestore
 // const photos = [
 
 // ]
@@ -44,7 +46,8 @@ import { Context } from "../Context";
 // }
 const Gallery = () => {
   // const [state, dispatch] = useReducer(reducer, initialState)
-  const { dispatch, state } = useContext(Context);
+  const { dispatch, state, read } = useContext(Context);
+  const { inputs  } = state
   const [count, setCount] = useState();
   // const [inputs, setInputs] = useState({title: null, file:null, path:null})
   // const [items, setItems] = useState(photos)
@@ -62,8 +65,12 @@ const Gallery = () => {
   //     setInputs({...inputs, title: e.target.value})
   //   }
   // }
+  useEffect(()=>{
+    readDocs().then(console.log)
+  },[])
   const handleOnSubmit = (e) => {
     e.preventDefault();
+    writeDoc(inputs,"stocks").then(console.log("no"))
     // setItems([inputs.path, ...items])
     dispatch({ type: "setItem" });
     // setInputs({title: null, file:null, path:null})
@@ -73,6 +80,9 @@ const Gallery = () => {
   useEffect(() => {
     console.log(state);
   }, [state.items]);
+  useEffect(() => {
+    read()
+  }, []);
 
   useEffect(() => {
     setCount(
