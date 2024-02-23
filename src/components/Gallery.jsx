@@ -3,7 +3,10 @@ import ImageCard from "./ImageCard";
 import UploadForm from "./Uploadform";
 import { Context } from "../Context";
 import Firestore from "../handlers/firestore";
-const {writeDoc, readDocs} = Firestore
+import Storage from "../handlers/storage";
+const { writeDoc, readDocs } = Firestore;
+const { uploadFile, downloadFile } = Storage;
+
 // const photos = [
 
 // ]
@@ -47,7 +50,7 @@ const {writeDoc, readDocs} = Firestore
 const Gallery = () => {
   // const [state, dispatch] = useReducer(reducer, initialState)
   const { dispatch, state, read } = useContext(Context);
-  const { inputs  } = state
+  const { inputs } = state;
   const [count, setCount] = useState();
   // const [inputs, setInputs] = useState({title: null, file:null, path:null})
   // const [items, setItems] = useState(photos)
@@ -65,23 +68,28 @@ const Gallery = () => {
   //     setInputs({...inputs, title: e.target.value})
   //   }
   // }
-  useEffect(()=>{
-    readDocs().then(console.log)
-  },[])
+  useEffect(() => {
+    readDocs().then(console.log);
+  }, []);
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    writeDoc(inputs,"stocks").then(console.log("no"))
-    // setItems([inputs.path, ...items])
-    dispatch({ type: "setItem" });
-    // setInputs({title: null, file:null, path:null})
-    // collapse(false)
-    toggle(!state.isCollapsed);
+    uploadFile(state.inputs)
+      .then(downloadFile)
+      .then((url) => {
+        writeDoc({ ...inputs, path: url }, "stocks").then(() => {
+          // setItems([inputs.path, ...items])
+          dispatch({ type: "setItem" });
+          // setInputs({title: null, file:null, path:null})
+          // collapse(false)
+          toggle(!state.isCollapsed);
+        });
+      });
   };
   useEffect(() => {
     console.log(state);
   }, [state.items]);
   useEffect(() => {
-    read()
+    read();
   }, []);
 
   useEffect(() => {
@@ -127,7 +135,7 @@ const Gallery = () => {
         {count}
         <div className="flex flex-wrap -m-4">
           {state.items.map((item, i) => (
-            <ImageCard key={i} photo={item.path} />
+            <ImageCard key={i} {...item}  />
           ))}
         </div>
       </div>
